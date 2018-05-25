@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 # dead.py
 #
 # By Alex Beckett
-# Date: May 2018
+# Date: 25 May 2018
 #
 # Battery level and death detection
 #
