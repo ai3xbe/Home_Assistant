@@ -8,9 +8,10 @@ from datetime import datetime, timezone
 # dead.py
 #
 # By Alex Beckett
-# Date: 26 May 2018
+# Date: May 2018
 #
-# Battery level and death detection in AppDaemon
+# Battery level and death detection
+#
 #
 #####################
 
