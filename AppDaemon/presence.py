@@ -37,13 +37,19 @@ class PresenceDetection(hass.Hass):
   def initialize(self):
           
   #Setup initial variables
+     self.debug = self.args["debug"]
      self.sensor = self.args["sensor"]
+     self.debug_str = self.sensor
      self.mode_switch = self.args["mode_switch"]
      self.script_prefix = self.args["script_prefix"]
-     self.dim_time = self.args["dim_time"]
-     self.off_time = self.args["off_time"]
-     self.debug = self.args["debug"]
-     self.debug_str = self.sensor
+     self.str_dim_time = self.get_state(self.args["dim_time_device"], attribute='state')
+     self.dim_time = (float(self.str_dim_time))
+     self.str_off_time = self.get_state(self.args["off_time_device"], attribute='state')
+     self.off_time = (float(self.str_off_time))
+     self.dbglog(self.dim_time)
+     
+     
+     
 
      #setup devices to listen on and tracker to make sure it's not us changing!
      self.devices = []
@@ -66,6 +72,7 @@ class PresenceDetection(hass.Hass):
      self.motion_listener2 = self.listen_state(self.motion_off, self.sensor, new = "off")
      self.motion_on = self.run_in(self.enable_motion_listener, 2)
      self.mode_listener = self.listen_state(self.mode_change, self.mode_switch)
+
      
      #setup timers. This is to avoid a null later on
      self.dim_timer = self.run_in(self.dim, 10)
@@ -93,6 +100,8 @@ class PresenceDetection(hass.Hass):
     self.motion_listener2 = self.listen_state(self.motion_off, self.sensor, new = "off")
 
 
+
+  
 
   #called when the mode is changed. Updates lights accordingly.
   def mode_change(self, entity, attribute, old, new, kwargs):
@@ -132,7 +141,7 @@ class PresenceDetection(hass.Hass):
   #If you turn a device off it will cancel dimming the room
   def device_change(self, entity, attribute, old, new, kwargs):
     self.current_time = datetime.now(timezone.utc)
-    self.timeout_time = self.last_update_time + timedelta(seconds=10)
+    self.timeout_time = self.last_update_time + timedelta(seconds=15)
 
     #bail out if not actual change
     if (new == old):
@@ -183,6 +192,11 @@ class PresenceDetection(hass.Hass):
   
   #set the dim and off timers when there is no longer presence
   def motion_off(self, entity, attribute, old, new, kwargs):
+    #make sure we have the right time delays
+
+    self.dim_time = int(float(self.get_state(self.args["dim_time_device"], attribute='state')))
+    self.off_time = int(float(self.get_state(self.args["off_time_device"], attribute='state')))
+    self.dbglog("Dim Time = " + str(self.dim_time) + " Off time = " + str(self.off_time))
     #Set new timers
     self.dbglog("Motion off - setting timers Dim time = " + str(self.dim_time) + " off time = " + str(self.off_time))
     #Cancel current timers
